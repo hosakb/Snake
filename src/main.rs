@@ -7,6 +7,5 @@ use std::io::stdout;
 use crate::game::Game;
 
 fn main() {
-    println!("Snake");
-    let game = Game::new(stdout(), 10, 10).run();
+    Game::new(stdout(), 50, 25).run();
 }

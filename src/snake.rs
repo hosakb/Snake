@@ -1,7 +1,6 @@
-use std::{time::Duration, clone};
+use std::time::Duration;
 
 use crossterm::event::{poll, read, Event, KeyCode};
-use rand::{seq::IteratorRandom, prelude::SliceRandom};
 
 use crate::point::Point;
 
@@ -19,17 +18,19 @@ pub struct Snake {
     pub direction: Direction,
 }
 
-
 impl Snake {
     pub fn new(width: u16, height: u16) -> Snake {
         Snake {
-            body: vec![Point{x: width/2, y: height/2}],
+            body: vec![Point {
+                x: width / 2,
+                y: height / 2,
+            }],
             direction: Direction::Right,
         }
     }
 
-    pub fn get_head(&mut self) -> &Point{
-        self.body.first().unwrap()
+    pub fn get_head(&mut self) -> &mut Point {
+        self.body.first_mut().unwrap()
     }
 
     pub fn get_direc(&mut self) {
@@ -46,7 +47,7 @@ impl Snake {
         }
     }
 
-    pub fn change_direc(&self) {
+    pub fn change_direc(&mut self) {
         match self.direction {
             Direction::Down => self.get_head().y -= 1,
             Direction::Up => self.get_head().y += 1,
@@ -55,32 +56,14 @@ impl Snake {
         }
     }
 
-    pub fn crossed(&self) -> bool {
-        let body = self.body.clone().split_off(1);
-
-        if body.contains(self.get_head()) {
-            return true;
-        }
-
-        false
-    }
-
-    pub fn hit_wall(&self, wall: &[Point]) -> bool{
-
-        if wall.contains(self.get_head()) {
-            return true
-        }
-
-        false
-    }
-
     pub fn eat(&mut self, food: Point) -> bool {
+        let head = *self.get_head();
 
-        if food == self.get_head().clone() {
+        if food == head {
             self.body.insert(0, food);
             true
         } else {
-            self.body.insert(0,self.get_head().clone());
+            self.body.insert(0, head);
             self.body.pop();
             false
         }
