@@ -1,11 +1,10 @@
 mod game;
 mod point;
 mod snake;
-
-use std::io::stdout;
+mod  terminal;
 
 use crate::game::Game;
 
 fn main() {
-    Game::new(stdout(), 50, 25).run();
+    Game::new(50, 25).run();
 }
