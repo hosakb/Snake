@@ -1,14 +1,13 @@
+use std::mem::replace;
 use std::ops::IndexMut;
 use std::panic::UnwindSafe;
 use std::time::Duration;
-use std::mem::replace;
 
-
-use rand::Rng;
 use crossterm::event::{poll, read, Event, KeyCode};
+use rand::Rng;
 
 use crate::point::Point;
-use crate::snake::{Snake, Direction};
+use crate::snake::{Direction, Snake};
 use crate::terminal::Terminal;
 
 const MAX_INTERVAL: u16 = 400;
@@ -29,7 +28,7 @@ pub struct Game {
 impl Game {
     pub fn new(width: u16, height: u16) -> Self {
         Game {
-            terminal: Terminal::new(width, height,  Vec::new()),
+            terminal: Terminal::new(width, height, Vec::new()),
             food: None,
             snake: Snake::new(width, height),
             speed: 0,
@@ -38,13 +37,11 @@ impl Game {
     }
 
     pub fn run(&mut self) {
-
-
         loop {
             self.get_user_input();
             self.update_values();
             self.terminal.render(self.snake.clone(), self.food.unwrap());
-            if self.check(){
+            if self.check() {
                 break;
             }
         }
@@ -61,11 +58,12 @@ impl Game {
                 break;
             }
         }
-    
     }
 
-    fn check(&mut self) -> bool{
-        if self.crossed() || self.hit_wall(){return true}
+    fn check(&mut self) -> bool {
+        if self.crossed() || self.hit_wall() {
+            return true;
+        }
 
         false
     }
@@ -88,7 +86,7 @@ impl Game {
         false
     }
 
-    fn get_user_input(&mut self){
+    fn get_user_input(&mut self) {
         if poll(Duration::from_millis(500)).expect("Error polling key press") {
             if let Event::Key(event) = read().expect("Error reading keys") {
                 self.snake.direction = match event.code {
@@ -102,48 +100,40 @@ impl Game {
         }
     }
 
-    fn update_values(&mut self){
-        self.move_or_eat();
-
-        if self.food.is_none(){
+    fn update_values(&mut self) {
+        if self.food.is_none() {
             self.new_food();
         }
+
+        self.move_or_eat();
     }
 
-    fn move_or_eat(&mut self){
-
+    fn move_or_eat(&mut self) {
         let food = self.food.unwrap();
         let head = *self.snake.get_head();
 
-        if head == food{
+        if head == food {
             self.snake.body.push(self.food.take().unwrap())
         }
 
         self.move_snake_part();
     }
 
-    fn move_snake_part(&mut self){
-
-        let head = *self.snake.body.first().unwrap();
-
-
-        for i in self.snake.body.len() - 1..0{
+    fn move_snake_part(&mut self) {
+        for i in self.snake.body.len() - 1..0 {
             if i != self.snake.body.len() - 1 {
-
-                self.snake.body.swap(i,  i - 1);
-
-
+                self.snake.body.swap(i, i - 1);
             } else {
+                let mut head = *self.snake.body.first().unwrap();
 
                 match self.snake.direction {
-                    Direction::Down => {
-                        
-                    }
-                        ,
-                    Direction::Up => point.y += 1,
-                    Direction::Left => point.x -= 1,
-                    Direction::Right => point.x += 1,
-                } 
+                    Direction::Down => head.y += 1,
+                    Direction::Up => head.y -= 1,
+                    Direction::Left => head.x -= 1,
+                    Direction::Right => head.x += 1,
+                }
+
+                *self.snake.body.index_mut(i) = head;
             }
         }
     }

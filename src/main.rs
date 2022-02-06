@@ -1,7 +1,7 @@
 mod game;
 mod point;
 mod snake;
-mod  terminal;
+mod terminal;
 
 use crate::game::Game;
 

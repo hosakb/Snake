@@ -17,8 +17,8 @@ impl From<Point> for crossterm::cursor::MoveTo {
     }
 }
 
-impl Display for Point{
+impl Display for Point {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-       write!(f, "x{}:y{}", self.x, self.y)
+        write!(f, "x{}:y{}", self.x, self.y)
     }
 }
