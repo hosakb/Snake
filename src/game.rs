@@ -1,6 +1,4 @@
-use std::mem::replace;
 use std::ops::IndexMut;
-use std::panic::UnwindSafe;
 use std::time::Duration;
 
 use crossterm::event::{poll, read, Event, KeyCode};
@@ -37,14 +35,21 @@ impl Game {
     }
 
     pub fn run(&mut self) {
+
+        self.terminal.setup_ui();
+
         loop {
-            self.get_user_input();
+            if self.get_user_input() {
+                break;
+            }
             self.update_values();
             self.terminal.render(self.snake.clone(), self.food.unwrap());
             if self.check() {
                 break;
             }
         }
+
+        self.terminal.clean_up_ui();
     }
 
     fn new_food(&mut self) {
@@ -86,7 +91,7 @@ impl Game {
         false
     }
 
-    fn get_user_input(&mut self) {
+    fn get_user_input(&mut self) -> bool{
         if poll(Duration::from_millis(500)).expect("Error polling key press") {
             if let Event::Key(event) = read().expect("Error reading keys") {
                 self.snake.direction = match event.code {
@@ -94,10 +99,13 @@ impl Game {
                     KeyCode::Up => Direction::Up,
                     KeyCode::Left => Direction::Left,
                     KeyCode::Right => Direction::Right,
+                    KeyCode::Char('q') => return true,
                     _ => self.snake.direction,
                 }
             }
         }
+
+        false
     }
 
     fn update_values(&mut self) {
