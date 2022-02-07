@@ -3,12 +3,12 @@ use std::io::Stdout;
 use std::io::Write;
 
 use crossterm::cursor::{Hide, MoveTo, Show};
-use crossterm::style::{Color, Print, SetForegroundColor};
+use crossterm::style::Print;
 use crossterm::terminal::{
     disable_raw_mode, enable_raw_mode, size, Clear, ClearType, EnterAlternateScreen,
     LeaveAlternateScreen, SetSize,
 };
-use crossterm::{queue, ExecutableCommand};
+use crossterm::{execute, queue};
 
 use crate::point::Point;
 use crate::snake::Snake;
@@ -22,19 +22,19 @@ pub struct Terminal {
 }
 
 impl Terminal {
-    pub fn new(width: u16, height: u16, boarder: Vec<Point>) -> Terminal {
+    pub fn new(width: u16, height: u16) -> Terminal {
         Terminal {
             stdout: stdout(),
             width,
             height,
             original_size: size().unwrap(),
-            boarder,
+            boarder: Vec::new(),
         }
     }
 
     pub fn setup_ui(&mut self) {
         let width = self.width;
-        let height = self.height;
+        let height = self.height + 2;
 
         enable_raw_mode().unwrap();
 
@@ -91,24 +91,33 @@ impl Terminal {
 
     fn draw_snake(&mut self, snake: Snake) {
         snake.body.into_iter().enumerate().for_each(|(i, p)| {
-            if i == 0 {
-                queue!(self.stdout, MoveTo::from(p), Print("▢".to_string())).unwrap();
+            if i != 0 {
+                execute!(self.stdout, MoveTo::from(p), Print("▢".to_string())).unwrap();
                 return;
             }
 
-            queue!(self.stdout, MoveTo::from(p), Print("o".to_string())).unwrap();
+            execute!(self.stdout, MoveTo::from(p), Print("o".to_string())).unwrap();
         });
     }
 
     fn draw_food(&mut self, food: Point) {
-        queue!(self.stdout, MoveTo::from(food), Print("🍒".to_string())).unwrap();
+        execute!(self.stdout, MoveTo::from(food), Print("🍒".to_string())).unwrap();
     }
 
-    pub fn render(&mut self, snake: Snake, food: Point) {
-        queue!(self.stdout, Clear(ClearType::All)).unwrap();
+    pub fn render(&mut self, snake: Snake, food: Point, score: u16) {
+        execute!(self.stdout, Clear(ClearType::All)).unwrap();
         self.draw_borders();
         self.draw_snake(snake);
         self.draw_food(food);
-        self.stdout.flush().unwrap();
+        self.draw_score(score);
+    }
+
+    pub fn remove_food(&mut self, food: Point) {
+        execute!(self.stdout, MoveTo::from(food), Print("".to_string())).unwrap();
+    }
+
+    fn draw_score(&mut self, score: u16){
+        let height = self.height;
+        execute!(self.stdout, MoveTo(1, height + 4), Print(format!("Score: {}", &score))).unwrap();
     }
 }

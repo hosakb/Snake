@@ -6,5 +6,5 @@ mod terminal;
 use crate::game::Game;
 
 fn main() {
-    Game::new(50, 25).run();
+    Game::new(40, 20).run();
 }
